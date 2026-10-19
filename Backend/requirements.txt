@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+supabase
+razorpay
+setuptools
+anthropic
