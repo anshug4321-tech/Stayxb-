@@ -226,9 +226,13 @@ def chat(c: ChatIn, req: Request):
     except Exception: return {'reply': txt[:400], 'fields': {}}
 
 # ---- serve the website from the same server (one link for everything) ----
-_page = open(os.path.join(os.path.dirname(__file__), 'static', 'index.html'), encoding='utf-8').read()
-_page = (_page.replace("API:'http://localhost:8000'", "API:''")
-              .replace("SUPABASE_URL:''", "SUPABASE_URL:'" + os.environ['SUPABASE_URL'] + "'")
-              .replace("SUPABASE_ANON_KEY:''", "SUPABASE_ANON_KEY:'" + os.environ['SUPABASE_ANON_KEY'] + "'"))
+_here = os.path.dirname(__file__)
+def _read_page():  # looks in static/ first, then next to main.py; never crashes if missing
+    for p in (os.path.join(_here, 'static', 'index.html'), os.path.join(_here, 'index.html')):
+        if os.path.exists(p): return open(p, encoding='utf-8').read()
+    return '<h2>StayXB API is running</h2><p>index.html is missing. Upload it next to main.py in the Backend folder.</p>'
+_page = (_read_page().replace("API:'http://localhost:8000'", "API:''")
+              .replace("SUPABASE_URL:''", "SUPABASE_URL:'" + os.environ.get('SUPABASE_URL', '') + "'")
+              .replace("SUPABASE_ANON_KEY:''", "SUPABASE_ANON_KEY:'" + os.environ.get('SUPABASE_ANON_KEY', '') + "'"))
 @app.get('/', response_class=HTMLResponse)
 def home(): return _page
